@@ -47,14 +47,14 @@ while has_more_items:
             # Extract lowest bid offer (no tax applied)
             bid = item.find('span', {'class': 'market_commodity_orders_header_promote'})
             if bid:
-                lowest_bid_offer = float(bid.text.strip().split(' ')[0].replace(',', ''))
+                lowest_bid_offer = float(bid.text.strip().split(' ')[0].replace(',', '').replace('.', '').replace('€', '')) / 100
             else:
                 continue
 
             # Extract lowest price listing (tax applied)
             price = item.find('span', {'class': 'market_listing_price market_listing_price_with_fee'})
             if price:
-                lowest_price_listing = (float(price.text.strip().split(' ')[0].replace(',', '')) / STEAM_TAX_DIVISOR) - 0.01
+                lowest_price_listing = (float(price.text.strip().split(' ')[0].replace(',', '').replace('.', '').replace('€', '')) / 100 / STEAM_TAX_DIVISOR) - 0.01
             else:
                 continue
 
@@ -98,6 +98,11 @@ if export_csv.lower() == 'yes':
 
         writer.writeheader()
         for item in profitable_items:
-            writer.writerow(item)
+            writer.writerow({
+                'name': item['name'],
+                'lowest_bid_offer': f"{item['lowest_bid_offer']:.2f}",
+                'lowest_price_listing': f"{item['lowest_price_listing']:.2f}",
+                'profit_margin': f"{item['profit_margin']:.2f}"
+            })
 
     print(f"Results exported to {csv_file_name}")
