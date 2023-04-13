@@ -85,3 +85,19 @@ for item in profitable_items:
     print(f"Lowest Bid Offer: €{item['lowest_bid_offer']:.2f}")
     print(f"Lowest Price Listing: €{item['lowest_price_listing']:.2f}")
     print(f"Profit Margin: €{item['profit_margin']:.2f}")
+
+# Prompt to export to CSV
+export_csv = input("Do you want to export the results to a CSV file? (yes/no): ")
+
+if export_csv.lower() == 'yes':
+    csv_file_name = input("Enter a name for the CSV file (without extension): ") + ".csv"
+
+    with open(csv_file_name, 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = ['name', 'lowest_bid_offer', 'lowest_price_listing', 'profit_margin']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for item in profitable_items:
+            writer.writerow(item)
+
+    print(f"Results exported to {csv_file_name}")
