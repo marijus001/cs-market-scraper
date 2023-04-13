@@ -46,11 +46,17 @@ while has_more_items:
 
             # Extract lowest bid offer (no tax applied)
             bid = item.find('span', {'class': 'market_commodity_orders_header_promote'})
-            lowest_bid_offer = float(bid.text.strip().split(' ')[0].replace(',', ''))
+            if bid:
+                lowest_bid_offer = float(bid.text.strip().split(' ')[0].replace(',', ''))
+            else:
+                continue
 
             # Extract lowest price listing (tax applied)
             price = item.find('span', {'class': 'market_listing_price market_listing_price_with_fee'})
-            lowest_price_listing = (float(price.text.strip().split(' ')[0].replace(',', '')) / STEAM_TAX_DIVISOR) - 0.01
+            if price:
+                lowest_price_listing = (float(price.text.strip().split(' ')[0].replace(',', '')) / STEAM_TAX_DIVISOR) - 0.01
+            else:
+                continue
 
             # Filter items above 10 euros and sort by descending price
             if lowest_price_listing >= MIN_PRICE_EUR and is_profitable(lowest_bid_offer, lowest_price_listing):
@@ -62,7 +68,8 @@ while has_more_items:
                 })
 
         # Check if there are more items
-        has_more_items = response.json()['has_more']
+        response_json = response.json()
+        has_more_items = response_json.get('has_more', False)
         start += 100
 
     else:
@@ -78,7 +85,3 @@ for item in profitable_items:
     print(f"Lowest Bid Offer: €{item['lowest_bid_offer']:.2f}")
     print(f"Lowest Price Listing: €{item['lowest_price_listing']:.2f}")
     print(f"Profit Margin: €{item['profit_margin']:.2f}")
-    print('-' * 40)
-
-# Prompt to export to CSV
-export_csv = input("Do you want to export the results to a CSV file? (yes/no)")
